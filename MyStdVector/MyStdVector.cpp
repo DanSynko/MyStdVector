@@ -19,6 +19,7 @@ namespace my_std {
             begin_it = arr;
             end_it = &arr[arr_size];
             end_capacity = &arr[arr_capacity];
+            create_some_arr();
         }
         MyVector(const MyVector& other) {
             std::cout << "The deep copy constructor was called: " << std::endl;
@@ -38,10 +39,14 @@ namespace my_std {
         }
         MyVector(MyVector&& other) noexcept {
             std::cout << "The move constructor was called: " << std::endl;
+            this->arr_size = other.arr_size;
+            this->arr_capacity = other.arr_capacity;
             this->arr = other.arr;
             this->begin_it = other.begin_it;
             this->end_it = other.end_it;
             this->end_capacity = other.end_capacity;
+            other.arr_size = 0;
+            other.arr_capacity = 0;
             other.arr = nullptr;
             other.begin_it = nullptr;
             other.end_it = nullptr;
@@ -52,13 +57,9 @@ namespace my_std {
             std::cout << "The deep copy operator= was called: " << std::endl;
             delete[] this->arr;
             this->arr = new T[other.arr_capacity];
-            /*for (int i = 0; i < other.arr_size; i++) {
-                this->arr[i] = other.arr[i];
-            }*/
-            for (T* ptr = other.begin_it, i = this->arr; ptr != other.end_it; ptr++, i++) {
+            for (T* ptr = other.begin_it, *i = this->arr; ptr != other.end_it; ptr++, i++) {
                 *i = *ptr;
             }
-            //T* old_arr = other.arr;
             this->arr_size = other.arr_size;
             this->arr_capacity = other.arr_capacity;
             this->begin_it = this->arr;
@@ -69,10 +70,14 @@ namespace my_std {
         }
         MyVector& operator=(MyVector&& other) noexcept {
             std::cout << "The move operator= was called: " << std::endl;
+            this->arr_size = other.arr_size;
+            this->arr_capacity = other.arr_capacity;
             this->arr = other.arr;
             this->begin_it = other.begin_it;
             this->end_it = other.end_it;
-            this->end_capacity =      other.end_capacity;
+            this->end_capacity = other.end_capacity;
+            other.arr_size = 0;
+            other.arr_capacity = 0;
             other.arr = nullptr;
             other.begin_it = nullptr;
             other.end_it = nullptr;
@@ -81,8 +86,7 @@ namespace my_std {
             return *this;
         }
         ~MyVector() {
-            std::cout << "The destructor was called: " << std::endl;
-            //std::cout << "Now desctructor for: " << *this << std::endl;
+            std::cout << "The destructor was called. " << std::endl;
             delete[] arr;
             begin_it = nullptr;
             end_it = nullptr;
@@ -104,7 +108,7 @@ namespace my_std {
             if (arr_capacity <= arr_size) {
                 arr_capacity *= 1.5;
                 T* new_arr = new T[arr_capacity];
-                for (T* ptr = begin_it, i = new_arr; ptr != end_it; ptr++, i++) {
+                for (T* ptr = begin_it, *i = new_arr; ptr != end_it; ptr++, i++) {
                     *i = *ptr;
                 }
                 delete[] arr;
@@ -119,15 +123,15 @@ namespace my_std {
             reallocation();
             std::cout << "old size: ";
             size();
-            int old_size = arr_size;
+            size_t old_size = arr_size;
             arr_size = new_size;
             if (arr_size > old_size) {
-                for (int i = old_size; i < arr_size; i++) {
+                for (size_t i = old_size; i < arr_size; i++) {
                     arr[i] = 1;
                 }
             }
             else if (arr_size < old_size) {
-                for (int i = arr_size; i < old_size; i++) {
+                for (size_t i = arr_size; i < old_size; i++) {
                     end_it--;
                 }
             }
@@ -153,36 +157,24 @@ namespace my_std {
         }
         void insert(T* iterator_position, const int val) {
             reallocation();
+            show_vector();
             // O(n)
             if (iterator_position != end()) {
-                // shift
-                show_vector();
-                for (T* ptr = iterator_position-1; ptr != end_capacity; ptr++) {
-                    *iterator_position = *ptr;
-                    //iterator_position++;
+                T* end_it_infor = end_it;
+                for (T* ptr = end_it - 1; ptr != iterator_position - 1; ptr--) {
+                    *end_it_infor = *ptr;
+                    end_it_infor--;
                 }
+                arr_size++;
+                end_it = &arr[arr_size];
                 *iterator_position = val;
             }
             // O(1)
             else {
-                // no shift
                 push_back(val);
             }
             show_vector();
         }
-        /*void insert(const T* iterator_position, int n) {
-            reallocation();
-        }*/
-        /*void insert(const T* iterator_begin, int n, const T* iterator_end,) {
-            reallocation();
-        }*/
-        // O(n)
-        /*void erase(T* iterator_position) {
-            show_vector();
-        }
-        void erase(T* iterator_position_begin, T* iterator_position_end) {
-
-        }*/
         bool empty() {
             return !arr_size;
         }
@@ -204,12 +196,14 @@ namespace my_std {
         T* end() {
             return end_it;
         }
+        const T* сbegin() const {
+            return begin_it;
+        }
+        const T* сend() const {
+            return end_it;
+        }
         void size() {
-            int i;
-            for (i = 0; i < arr_size;) {
-                i++;
-            }
-            std::cout << "vector size: " << i << "." << std::endl;
+            std::cout << "vector size: " << arr_size << "." << std::endl;
         }
         void reserve(const int reserved_ram) {
             arr_capacity = reserved_ram;
@@ -218,9 +212,6 @@ namespace my_std {
         void capacity() {
             std::cout << "vector capacity size: " << arr_capacity << "." << std::endl;
         }
-        /*T max_size() {
-            return sizeof(arr);
-        }*/
         T& at(int i) {
             if (i < 0 || i >= arr_size) {
                 throw std::out_of_range("out_of_range");
@@ -233,12 +224,11 @@ namespace my_std {
         void clear() {
             arr_size = 0;
             end_it = &arr[arr_size];
-            show_vector();
         }
         void shrink_to_fit() {
             arr_capacity = arr_size;
             T* new_arr = new T[arr_capacity];
-            for (T* ptr = begin_it, i = new_arr; ptr != end_it; ptr++, i++) {
+            for (T* ptr = begin_it, *i = new_arr; ptr != end_it; ptr++, i++) {
                 *i = *ptr;
             }
             delete[] arr;
@@ -255,7 +245,7 @@ int main()
 {
     my_std::MyVector<int> my_vector;
     std::cout << "Welcome to MyStdVector! There is a vector<int>: ";
-    my_vector.create_some_arr();
+    //my_vector.create_some_arr();
     std::cout << "" << std::endl;
     std::cout << "my_std::size()" << std::endl;
     my_vector.size();
@@ -288,37 +278,46 @@ int main()
     int* data_element = my_vector.data();
     std::cout << data_element << std::endl;
     std::cout << "" << std::endl;
-    /*std::cout << "my_std::insert() - some value in some position" << std::endl;
-    my_vector.insert(my_vector.begin() + 7, 15);*/
-    /*std::cout << "my_std::insert() - some values in some position" << std::endl;
-    my_vector.insert(my_vector.begin(), 15, 20, 25);
-    std::cout << "my_std::insert() - some values in range" << std::endl;
-    my_vector.insert(my_vector2, my_vector3.begin(), my_vector3.end());*/
     std::cout << "my_std::at() (correct work)" << std::endl;
-    my_vector.at(2);
+    my_vector.at(4);
     std::cout << "" << std::endl;
     try {
         std::cout << "my_std::at() (if index is invalid)" << std::endl;
-        my_vector.at(-2);
+        my_vector.at(-1);
         std::cout << "" << std::endl;
     }
     catch (std::out_of_range& e) {
         std::cout << "Error: " << e.what() << std::endl;
     }
-    /*std::cout << "my_std::clear()" << std::endl;
-    my_vector.clear();
-    my_vector.size();*/
     std::cout << "my_std::shrink_to_fit()" << std::endl;
     my_vector.shrink_to_fit();
-    /*std::cout << "my_std::max_size()" << my_vector.max_size() << std::endl;
-    std::cout << "" << std::endl;*/
+    std::cout << "\n" << std::endl;
 
-    // rule of five
-    my_std::MyVector<int> my_vector2;
-    my_vector = my_vector;
-    my_vector = my_vector2;
-    my_std::MyVector<int> my_vector3(my_vector);
 
+    std::cout << "rule of five: " << std::endl;
+    // deep copy constructor
+    my_std::MyVector<int> my_vector_dp(my_vector);
+    // move constructor
+    my_std::MyVector<int> my_vector_rval;
+    my_std::MyVector<int> my_vector_m = std::move(my_vector_rval);
+    // deep copy operator=
+    my_std::MyVector<int> my_vector_dp_op;
+    my_vector_dp_op = my_vector;
+    // move operator=
+    my_std::MyVector<int> my_vector_rval2;
+    my_vector_dp = my_vector_rval2;
+
+
+    std::cout << "my_std::clear()" << std::endl;
+    my_vector.clear();
+    my_vector.size();
+    std::cout << "my_std::empty()" << std::endl;
+    if (my_vector.empty()) {
+        std::cout << "The vector is empty. \n" << std::endl;
+    }
+    else {
+        std::cout << "The vector is not empty. \n" << std::endl;
+    }
     return 0;
 }
 

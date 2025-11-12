@@ -56,6 +56,7 @@ namespace my_std {
             std::uninitialized_copy(other.begin_it, other.end_it, this->arr);
             T* new_end_capacity = &this->arr[this->arr_capacity];
             this->end_capacity = new_end_capacity;
+            std::cout << "A new vector created by deep copy constructor: " << std::endl;
             this->show_vector();
         }
         MyVector(MyVector&& other) noexcept {
@@ -72,16 +73,18 @@ namespace my_std {
             other.begin_it = nullptr;
             other.end_it = nullptr;
             other.end_capacity = nullptr;
+            std::cout << "A new vector created by move constructor: " << std::endl;
             this->show_vector();
         }
         MyVector& operator=(MyVector other) noexcept {
             using std::swap;
             swap(*this, other);
+            std::cout << "A new vector after overloaded operator=(with copy-and-swap): " << std::endl;
             this->show_vector();
             return *this;
         }
         ~MyVector() {
-            std::cout << "The destructor was called. " << std::endl;
+            std::cout << "The destructor of vector was called. " << std::endl;
             destroy_elements();
             operator delete (arr);
             begin_it = nullptr;
@@ -235,10 +238,11 @@ namespace my_std {
             begin_it = arr;
             end_it = &arr[arr_size];
             end_capacity = &arr[arr_capacity];
-            capacity();
+            show_vector();
+            std::cout << "Capacity size of vector above: " << capacity() << "\n" << std::endl;
         }
-        void capacity() {
-            std::cout << "vector capacity size: " << arr_capacity << "." << std::endl;
+        size_t capacity() {
+            return arr_capacity;
         }
         T& at(int i) {
             if (i < 0 || i >= arr_size) {
@@ -326,6 +330,7 @@ public:
         this->t = other.t;
         this->t_end = other.t_end;
         this->t_end_capacity = other.t_end_capacity;
+        this->text = other.text;
         other.t_size = 0;
         other.t_capacity = 0;
         other.t = nullptr;
@@ -364,8 +369,9 @@ public:
 };
 int main()
 {
-    std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: ";
+    std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: " << std::endl;
     my_std::MyVector<Test<int>> my_vector;
+    std::cout << "(The output of the object's memory contents(like 0, 1, 2) only occurs within its constructor.)" << std::endl;
     //my_std::MyVector<int> my_vector;
     //my_std::MyVector<char> my_vector;
     //my_std::MyVector<bool> my_vector;
@@ -377,7 +383,7 @@ int main()
     std::cout << my_vector.size() << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::capacity()" << std::endl;
-    my_vector.capacity();
+    std::cout << my_vector.capacity() << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::resize()" << std::endl;
     my_vector.resize(22);
@@ -430,23 +436,34 @@ int main()
     std::cout << "\n" << std::endl;
 
 
-    std::cout << "rule of five: " << std::endl;
-    // deep copy constructor
+    std::cout << "rule of five: \n" << std::endl;
+
+    std::cout << "deep copy constructor: " << std::endl;
     my_std::MyVector<Test<int>> my_vector_dp(my_vector);
-    // move constructor
+
+    std::cout << "\n";
+
+    std::cout << "move constructor: " << std::endl;
+    std::cout << "a new vector for move constructor: " << std::endl;
     my_std::MyVector<Test<int>> my_vector_rval;
     my_std::MyVector<Test<int>> my_vector_m = std::move(my_vector_rval);
-    // deep copy operator=
+
+    std::cout << "\n";
+    std::cout << "deep copy operator=: " << std::endl;
+    std::cout << "a new vector for deep copy operator=: " << std::endl;
     my_std::MyVector<Test<int>> my_vector_dp_op;
     my_vector_dp_op = my_vector;
-    // move operator=
+
+    std::cout << "\n";
+    std::cout << "move operator=: " << std::endl;
+    std::cout << "a new vector for move operator=: " << std::endl;
     my_std::MyVector<Test<int>> my_vector_rval2;
-    my_vector_dp = my_vector_rval2;
+    my_vector_dp = std::move(my_vector_rval2);
 
 
     std::cout << "my_std::clear()" << std::endl;
     my_vector.clear();
-    my_vector.size();
+    std::cout << "Vector size after clear(): " << my_vector.size() << std::endl;
     std::cout << "my_std::empty()" << std::endl;
     if (my_vector.empty()) {
         std::cout << "The vector is empty. \n" << std::endl;

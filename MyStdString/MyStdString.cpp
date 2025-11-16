@@ -79,26 +79,91 @@ namespace my_std {
             os << other.str;
             return os;
         }
-        friend std::istream& operator>>(std::istream& is, MyString& other) {
+        /*friend std::istream& operator>>(std::istream& is, MyString& other) {
+            const char* new_str = new char[1024];
+            is >> other.str;
             return is;
-        }
+        }*/
         friend bool operator<(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first < *ptr_second) {
+                    return true;
+                }
+                else if (*ptr_first > *ptr_second) {
+                    return false;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first < *ptr_second;
         }
         friend bool operator>(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first > *ptr_second) {
+                    return true;
+                }
+                else if (*ptr_first < *ptr_second) {
+                    return false;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first > *ptr_second;
         }
         friend bool operator<=(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first > *ptr_second) {
+                    return false;
+                }
+                else if (*ptr_first < *ptr_second) {
+                    return true;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first <= *ptr_second;
         }
         friend bool operator>=(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first < *ptr_second) {
+                    return false;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first >= *ptr_second;
         }
         friend bool operator==(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first != *ptr_second) {
+                    return false;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first == *ptr_second;
         }
         friend bool operator!=(const MyString& first, const MyString& second) {
-            return ;
+            const char* ptr_first = first.str;
+            const char* ptr_second = second.str;
+            while (*ptr_first != '\0' && *ptr_second != '\0') {
+                if (*ptr_first != *ptr_second) {
+                    return true;
+                }
+                ptr_first++;
+                ptr_second++;
+            }
+            return *ptr_first != *ptr_second;
         }
         void show_string() const {
             std::cout << str << std::endl;

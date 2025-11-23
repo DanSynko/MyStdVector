@@ -13,15 +13,6 @@ namespace my_std {
         Node<T>* head;
         size_t size;
 
-        /*Node<T>* find_Node(Node<T>* needed_Node) {
-            for (Node<T>* current = head; current != nullptr; current = current->next) {
-                if (current == needed_Node) {
-                    return current;
-                }
-            }
-            return nullptr;
-        }*/
-
         friend void swap(MyForwardList& first, MyForwardList& second) {
             using std::swap;
             swap(first.head, second.head);
@@ -122,33 +113,55 @@ namespace my_std {
         void push_front(const T& data) {
             Node<T>* newNode = new Node<T>{ data, head };
             head = newNode;
+            size++;
             display();
         }
         // O(1)
         void pop_front() {
-            if (head != nullptr) {
+            if (head == nullptr) {
+                return;
+            }
+            else {
                 Node<T>* old_head = head;
                 Node<T>* new_head = head->next;
                 head = new_head;
                 delete old_head;
                 display();
             }
-            else {
-                return;
-            }
+            size--;
         }
         // O(1)
         void insert_after(Node<T>* it, const T& val) {
-            Node<T>* newNode_for_next = it->next;
-            Node<T>* newNode = new Node<T>{ val, newNode_for_next };
-            it->next = newNode;
+            if (head == nullptr){
+                head = new Node<T>{ val, nullptr };
+            }
+            else if (head->next == nullptr) {
+                head->next = new Node<T>{ val, nullptr };
+            }
+            else {
+                Node<T>* newNode = new Node<T>{ val, it->next };
+                it->next = newNode;
+            }
+            size++;
             display();
         }
         // O(1)
         void erase_after(Node<T>* it) {
-            Node<T>* oldNode = it->next;
-            it->next = oldNode->next;
-            delete oldNode;
+            if (head == nullptr) {
+                return;
+            }
+            else {
+                if (head->next == nullptr) {
+                    delete head;
+                    head == nullptr;
+                }
+                else {
+                    Node<T>* oldNode = it->next;
+                    it->next = oldNode->next;
+                    delete oldNode;
+                }
+            }
+            size--;
             display();
         }
         void resize(const size_t size) {
@@ -215,14 +228,13 @@ namespace my_std {
 
 int main()
 {
+    std::cout << "Rule of five for std::forward_list:" << std::endl;
     my_std::MyForwardList<int>::ruleoffive_list_demo();
 
-    my_std::MyForwardList<int> forward_list;
-    forward_list.display();
     std::cout << "" << std::endl;
     my_std::MyForwardList<int> init_forward_list = {11, 22, 45, 32, 2025};
-    std::cout << "Initializing a new forward list." << std::endl;
     init_forward_list.display();
+
     std::cout << "my_std::MyForwardList.push_front()" << std::endl;
     init_forward_list.push_front(404);
     std::cout << "my_std::MyForwardList.pop_front()." << std::endl;

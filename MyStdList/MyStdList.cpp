@@ -47,6 +47,18 @@ namespace my_std {
                 std::cout << "" << std::endl;
             }
         }
+
+        Node<T>* find_Node(const size_t i) const {
+            size_t count = 0;
+            for (Node<T>* current = head; current != nullptr; current = current->next) {
+                if (count == i) {
+                    return current;
+                }
+                count++;
+            }
+            return nullptr;
+        }
+
     public:
         MyList() : head(nullptr), tail(nullptr), size(0) {}
 
@@ -56,7 +68,6 @@ namespace my_std {
                 Node<T>* newNode = new Node<T>{ i, nullptr, nullptr };
                 if (!head) {
                     head = newNode;
-                    // newNode->prev = nullptr;
                     current = newNode;
                 }
                 else {
@@ -75,7 +86,6 @@ namespace my_std {
                 Node<T>* newNode = new Node<T>{ other_current->data, nullptr, nullptr };
                 if (!head) {
                     head = newNode;
-                    // newNode->prev = nullptr;
                     current = newNode;
                 }
                 else {
@@ -213,19 +223,18 @@ namespace my_std {
             }
             display();
         }
-        void insert_after(Node<T>* it, const T& val) {
+        void insert_after(Node<T>* firstNode, const T& val) {
             if (head == nullptr) {
-                Node<T>* newNode = new Node<T>{ val, nullptr, nullptr };
-                head = newNode;
+                head = new Node<T>{ val, nullptr, nullptr };
                 tail = head;
             }
             else {
-                //Node<T>* newNode_for_next = it->next;
-                Node<T>* newNode = new Node<T>{ val, it->next, it };
-                it->next = newNode;
-                /*Node<T>* updNode = newNode->next;
-                updNode*/
-                if (newNode->next == nullptr) {
+                Node<T>* newNode = new Node<T>{ val, firstNode->next, firstNode };
+                firstNode->next = newNode;
+                if (newNode->next != nullptr) {
+                    newNode->next->prev = newNode;
+                }
+                else {
                     tail = newNode;
                 }
             }
@@ -249,8 +258,36 @@ namespace my_std {
             size--;
             display();
         }
-        void resize(const size_t new_size) {
-            
+        void resize(const size_t size) {
+            size_t old_size = this->size;
+            size_t new_size = size;
+            if (old_size < new_size) {
+                Node<T>* current = tail;
+                for (size_t i = old_size; i < new_size; i++) {
+                    Node<T>* newNode = new Node<T>{ T(), nullptr, current };
+                    current->next = newNode;
+                    current = newNode;
+                }
+                tail = current;
+            }
+            else if (old_size > new_size) {
+                Node<T>* lastNode = find_Node(new_size - 1);
+                Node<T>* current_for_prev = nullptr;
+                for (Node<T>* current = tail; current != lastNode; current = current_for_prev) {
+                    current_for_prev = current->prev;
+                    delete current;
+                }
+                tail = lastNode;
+                tail->next = nullptr;
+            }
+            else if (new_size == 0) {
+                clear();
+            }
+            else {
+                return;
+            }
+            this->size = new_size;
+            display();
         }
         bool empty() {
             return !head;
@@ -270,10 +307,10 @@ namespace my_std {
 
 int main()
 {
+    std::cout << "Rule of five for std::list:" << std::endl;
     my_std::MyList<int>::ruleoffive_list_demo();
 
-    //my_std::MyList<int> init_list = { 5, 15, 20, 25, 30, 35 };
-    my_std::MyList<int> init_list;
+    my_std::MyList<int> init_list = { 5, 15, 20, 25, 30, 35 };
     init_list.display();
 
     std::cout << "my_std::MyList.push_front(404)" << std::endl;
@@ -286,10 +323,10 @@ int main()
     std::cout << "my_std::MyList.erase_after()." << std::endl;
     auto it_erase = init_list.begin();
     init_list.erase_after(it_erase);
-    /*std::cout << "my_std::MyForwardList.resize() (to bigger size)." << std::endl;
+    std::cout << "my_std::MyForwardList.resize() (to bigger size)." << std::endl;
     init_list.resize(10);
     std::cout << "my_std::MyForwardList.resize() (to smaller size)." << std::endl;
-    init_list.resize(3);*/
+    init_list.resize(3);
     std::cout << "my_std::MyForwardList.clear()." << std::endl;
     init_list.clear();
     init_list.display();
